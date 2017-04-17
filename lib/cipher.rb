@@ -3,15 +3,14 @@ require './lib/cipher/deck'
 module Cipher
   class Solitaire
     # http://rubyquiz.com/quiz1.html
-    attr_reader :plaintext, :deck
+    attr_reader :deck
 
-    def initialize(plaintext)
-      @plaintext = scrub(plaintext)
-      @deck = Deck.new
+    def initialize(deck = Deck.new)
+      @deck = deck.dup
     end
 
-    def encrypt
-      plaintext.map do |text_block|
+    def encrypt(text_input)
+      scrub(text_input).map do |text_block|
         text_block
           .each_byte
           .map{|c|c-65}
@@ -21,6 +20,21 @@ module Cipher
           .map(&:chr)
           .join('')
       end.join(' ')
+    end
+
+    def decrypt(text_input)
+      text_input
+        .split(' ')
+        .map do |text_block|
+          text_block
+            .each_byte
+            .map{|c|c-65}
+            .map{|c|c - stream}
+            .map{|c|c%26 }
+            .map{|c|c+65}
+            .map(&:chr)
+            .join('')
+        end.join(' ')
     end
 
     private

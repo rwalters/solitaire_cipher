@@ -4,7 +4,7 @@ module Cipher
 
     attr_reader :current_deck
     def initialize(start_deck = START_DECK)
-      @current_deck = start_deck
+      @current_deck = start_deck.dup
     end
 
     def key
@@ -63,6 +63,10 @@ module Cipher
       @current_deck = t_deck.freeze
 
       self
+    end
+
+    def to_a
+      current_deck
     end
 
     private
