@@ -1,59 +1,21 @@
 require './lib/cipher/deck'
+require './lib/cipher/solitaire'
 
 module Cipher
-  class Solitaire
+  class Cipher
     # http://rubyquiz.com/quiz1.html
-    attr_reader :deck
+    attr_reader :strategy
 
-    def initialize(deck = Deck.new)
-      @deck = deck.dup
+    def initialize(strategy = ::Cipher::Solitaire.new)
+      @strategy = strategy
     end
 
     def encrypt(text_input)
-      scrub(text_input).map do |text_block|
-        text_block
-          .each_byte
-          .map{|c|c-65}
-          .map{|c|c + stream}
-          .map{|c|c%26 }
-          .map{|c|c+65}
-          .map(&:chr)
-          .join('')
-      end.join(' ')
+      strategy.encrypt(text_input)
     end
 
     def decrypt(text_input)
-      text_input
-        .split(' ')
-        .map do |text_block|
-          text_block
-            .each_byte
-            .map{|c|c-65}
-            .map{|c|c - stream}
-            .map{|c|c%26 }
-            .map{|c|c+65}
-            .map(&:chr)
-            .join('')
-        end.join(' ')
-    end
-
-    private
-
-    def stream
-     deck.pull.to_i
-    end
-
-    def scrub(input)
-      input
-        .upcase
-        .tr('^A-z', '')
-        .gsub(/(\w{5})/,'\1 ')
-        .split(' ')
-        .tap do |ary|
-          ary[-1] =
-            ("%-5s"%ary.last)
-            .tr(' ', 'X')
-        end
+      strategy.decrypt(text_input)
     end
   end
 end
