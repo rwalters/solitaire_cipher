@@ -11,33 +11,29 @@ module Cipher
 
     def encrypt(text_input)
       scrub(text_input).map do |text_block|
-        text_block
-          .each_byte
-          .map{|c|c-65}
-          .map{|c|c + stream}
-          .map{|c|c%26 }
-          .map{|c|c+65}
-          .map(&:chr)
-          .join('')
+        process(text_block){|c| c + stream }
       end.join(' ')
     end
 
     def decrypt(text_input)
-      text_input
-        .split(' ')
-        .map do |text_block|
-          text_block
-            .each_byte
-            .map{|c|c-65}
-            .map{|c|c - stream}
-            .map{|c|c%26 }
-            .map{|c|c+65}
-            .map(&:chr)
-            .join('')
-        end.join(' ')
+      scrub(text_input).map do |text_block|
+        process(text_block){|c| c - stream }
+      end.join(' ')
     end
 
     private
+
+    def process(text, &block)
+      text
+        .each_char
+        .map(&:ord)
+        .map{|c| c - 65}
+        .map{|c| block.call(c) }
+        .map{|c| c % 26 }
+        .map{|c| c + 65}
+        .map(&:chr)
+        .join('')
+    end
 
     def stream
      deck.pull.to_i
@@ -46,9 +42,8 @@ module Cipher
     def scrub(input)
       input
         .upcase
-        .tr('^A-z', '')
-        .gsub(/(\w{5})/,'\1 ')
-        .split(' ')
+        .tr('^A-Z', '')
+        .scan(/.{1,5}/)
         .tap do |ary|
           ary[-1] =
             ("%-5s"%ary.last)
